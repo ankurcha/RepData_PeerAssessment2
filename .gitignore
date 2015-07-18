@@ -19,11 +19,17 @@ vignettes/*.pdf
 *.csv
 *.rds
 
+#Data directory
+data/*
 #Auth files
 .httr-oauth
 
-# Zip files
+# Compressed files
 *.zip
+*.bz2
+*.Z
+*.gz
 
 #swap files
 .*.swp
+.Rproj.user

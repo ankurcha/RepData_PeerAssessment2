@@ -1,5 +1,7 @@
 require(data.table)
-dataFileExt <-  "/home/pengler/ReproducableResearch/RepData_PeerAssessment2/data/repdata.data.StormData.csv"
+mydir <- getwd()
+dataFileExt <- paste0(mydir,"/data/repdata.data.StormData.csv")
+#dataFileExt <-  "/home/pengler/ReproducableResearch/RepData_PeerAssessment2/data/repdata.data.StormData.csv"
 # The data set has 37 columns,
 importColumns <- rep("NULL",37)
 # Populate the colClasses vectors will NULLs (will import nothing)

@@ -2,23 +2,34 @@
 .Rhistory
 .Rapp.history
 .R*
+
 # Example code in package build process
 *-Ex.R
+
 # RStudio files
 .Rproj.user/
+
 # produced vignettes
 vignettes/*.html
 vignettes/*.pdf
+
 #Data files
 *.pdf
 *.txt
 *.csv
 *.rds
+
+#Data directory
+data/*
 #Auth files
 .httr-oauth
-# Zip files
+
+# Compressed files
 *.zip
+*.bz2
+*.Z
+*.gz
+
 #swap files
 .*.swp
 .Rproj.user
-RepData_PeerAssessment2.Rproj

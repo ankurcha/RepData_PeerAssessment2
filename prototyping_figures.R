@@ -11,4 +11,5 @@ p = ggplot(data=damage, aes(x=EVTYPE, y=value, fill=variable)) +
     theme(axis.text.x=element_text(angle = -90, hjust = 0, vjust = .5)) +
     scale_y_continuous(labels=dollar)
 
+
 print(p)

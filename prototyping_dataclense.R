@@ -3,6 +3,16 @@
 # Make a temp value for testing
 stormData <- stormDataOrig
 origRows <-nrow(stormData)
+
+# We are only interested in data where there was: Property/Crop Damage, 
+# Injuries or Fatalities. If all of these data points are 0 for a row we
+# can discard it. 
+
+stormData <- stormData[(stormData$PROPDMG > 0 | 
+                        stormData$CROPDMG > 0 |
+                        stormData$FATALITIES >0 |
+                        stormData$INJURIES >0) , ]
+
 #Convert our date's to a POSIX date 
 stormData$BGN_DATE <-as.POSIXct( stormData$BGN_DATE , format = "%m/%d/%Y %H:%M:%S")
 
@@ -15,9 +25,11 @@ stormData$BGN_DATE <-as.POSIXct( stormData$BGN_DATE , format = "%m/%d/%Y %H:%M:%
 # Covert the PROPDMGEXP to upper case for consistency
 stormData$PROPDMGEXP<- as.factor(toupper(stormData$PROPDMGEXP))
 stormData$CROPDMGEXP<- as.factor(toupper(stormData$CROPDMGEXP))
+
 # Filter out rows with bad values
 stormData <- stormData[stormData$PROPDMGEXP %in% c("","K","M","B"),]
 stormData <- stormData[stormData$CROPDMGEXP %in% c("","K","M","B"),]
+
 #re-level the factor now that rows have been removed
 stormData$PROPDMGEXP <-factor(stormData$PROPDMGEXP)
 stormData$CROPDMGEXP <-factor(stormData$CROPDMGEXP)
@@ -49,105 +61,110 @@ stormData <- stormData[!grepl("^Summary",stormData$EVTYPE,ignore.case = TRUE),]
 stormData <- stormData[!grepl("^Record",stormData$EVTYPE,ignore.case = TRUE),]
 stormData <- stormData[!grepl("^Month",stormData$EVTYPE,ignore.case = TRUE),]
 
-#Rename factors that seem to be miscatagorized - "OTHER" will be the catch all catagory
+# #Rename factors that seem to be miscatagorized - "OTHER" will be the catch all catagory
 levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="?"] <- "OTHER"
 levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="Other"] <- "OTHER"
 levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="Marine Accident"] <- "OTHER"
 levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="MARINE MISHAP"] <- "OTHER"
-levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="?"] <- "OTHER"
-levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="?"] <- "OTHER"
-levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="EXCESSIVE"] <- "OTHER"
-levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="NORTHERN LIGHTS"] <- "OTHER"
+# levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="EXCESSIVE"] <- "OTHER"
+# levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="NORTHERN LIGHTS"] <- "OTHER"
 levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="APACHE COUNTY"] <- "OTHER"
-levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="Temperature record"] <- "OTHER"
+# levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="Temperature record"] <- "OTHER"
 levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="DROWNING"] <- "OTHER"
-levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="NONE"] <- "OTHER"
-levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="Metro Storm, May 26"] <- "OTHER"
-levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="RED FLAG CRITERIA"] <- "OTHER"
-levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="No Severe Weather"] <- "OTHER"
-levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="SOUTHEAST"] <- "OTHER"
+# levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="NONE"] <- "OTHER"
+# levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="Metro Storm, May 26"] <- "OTHER"
+# levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="RED FLAG CRITERIA"] <- "OTHER"
+# levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="No Severe Weather"] <- "OTHER"
+# levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="SOUTHEAST"] <- "OTHER"
 levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="RAPIDLY RISING WATER"] <- "OTHER"
-levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="WALL CLOUD"] <- "OTHER"
-levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="ROTATING WALL CLOUD"] <- "OTHER"
-levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="LARGE WALL CLOUD"] <- "OTHER"
-levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="REMNANTS OF FLOYD"] <- "OTHER"
+# levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="WALL CLOUD"] <- "OTHER"
+# levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="ROTATING WALL CLOUD"] <- "OTHER"
+# levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="LARGE WALL CLOUD"] <- "OTHER"
+# levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="REMNANTS OF FLOYD"] <- "OTHER"
+levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="HEAVY MIX"] <- "HEAVY RAIN"
+levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="SEVERE TURBULENCE"] <- "HEAVY RAIN"
 
-
-
-
-# Group EVTYPES to align with doc
-# Due to overlapping in descriptions the ordering the grouping is done in is fairly sensitive 
-
-
-#TStorm Surge
+# 
+# 
+# 
+# 
+# # Group EVTYPES to align with doc
+# # Due to overlapping in descriptions the ordering the grouping is done in is fairly sensitive 
+# 
+# 
+# #TStorm Surge
 levels(stormData$EVTYPE)[grepl("SURGE",levels(stormData$EVTYPE),ignore.case = TRUE)] <- "STORM SURGE"
-
-#Tide
+# 
+# #Tide
 levels(stormData$EVTYPE)[grepl("TIDE",levels(stormData$EVTYPE),ignore.case = TRUE)] <- "ASTRONOMICAL HIGH TIDE"
-
-#Avalanche
+# 
+# #Avalanche
 levels(stormData$EVTYPE)[grepl("AVALA",levels(stormData$EVTYPE),ignore.case = TRUE)] <- "AVALANCHE"
-
-#Blizzard
+# 
+# #Blizzard
 levels(stormData$EVTYPE)[grepl("BLIZZ",levels(stormData$EVTYPE),ignore.case = TRUE)] <- "BLIZZARD"
-
-#Rip Current
+# 
+# #Rip Current
 levels(stormData$EVTYPE)[grepl("RIP",levels(stormData$EVTYPE),ignore.case = TRUE)]  <- "RIP CURRENT" 
-
-#High Surf
+# 
+# #High Surf
 levels(stormData$EVTYPE)[grepl("SURF",levels(stormData$EVTYPE),ignore.case = TRUE)] <-"HIGH SURF"
-
-#Costal Flooding
+# 
+# #Costal Flooding
 levels(stormData$EVTYPE)[grepl("COAST",levels(stormData$EVTYPE),ignore.case = TRUE)] <- "COASTALFLUD" #temp
-
-#Debris Flow
+# 
+# #Debris Flow
 levels(stormData$EVTYPE)[grepl("SLIDE",levels(stormData$EVTYPE),ignore.case = TRUE)] <- "DEBRIS FLOW" 
 levels(stormData$EVTYPE)[grepl("SLUMP",levels(stormData$EVTYPE),ignore.case = TRUE)] <- "DEBRIS FLOW" 
-
-#Extreme
-levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="EXTREME HEAT"] <- "EXCESSIVE HEAT"
+# 
+# #Extreme
+levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="EXTREME HEAT"] <- "EXH1"
+levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="EXCESSIVE HEAT"] <- "EXH1"
 levels(stormData$EVTYPE)[grepl("EXTREME ",levels(stormData$EVTYPE),ignore.case = TRUE)] <- "ECWC1" #temp
-
-#Frost/Freezing
+# 
+# #Frost/Freezing
 levels(stormData$EVTYPE)[grepl("FROST",levels(stormData$EVTYPE),ignore.case = TRUE)] <- "FROST/FREEZE"
 levels(stormData$EVTYPE)[grepl("FREEZ",levels(stormData$EVTYPE),ignore.case = TRUE)] <- "FROST/FREEZE"
-
-
-
-#Fog
+# 
+# 
+# 
+# #Fog
 levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="FOG AND COLD TEMPERATURES"] <-  "DENSE FOG"
 levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="FOG"] <-  "DENSE FOG"
-levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="VOG"] <-  "DENSE FOG" #typo perhaps? 
-levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="PATCHY DENSE FOG"] <-  "DENSE FOG"
+# levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="VOG"] <-  "DENSE FOG" #typo perhaps? 
+# levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="PATCHY DENSE FOG"] <-  "DENSE FOG"
 levels(stormData$EVTYPE)[grepl("FREEZING FOG",levels(stormData$EVTYPE),ignore.case = TRUE)] <- "FREEZING FOG"
-levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="Ice Fog"] <-  "FREEZING FOG"
+# levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="Ice Fog"] <-  "FREEZING FOG"
 levels(stormData$EVTYPE)[grepl("GLAZE",levels(stormData$EVTYPE),ignore.case = TRUE)] <- "FREEZING FOG"
-
-
-#Dust
+# 
+# 
+# #Dust
 levels(stormData$EVTYPE)[grepl("SMOKE",levels(stormData$EVTYPE),ignore.case = TRUE)] <- "DENSE SMOKE"
 levels(stormData$EVTYPE)[grepl("DROUGHT",levels(stormData$EVTYPE),ignore.case = TRUE)] <- "DROUGHT"
 levels(stormData$EVTYPE)[grepl("MICROBURST",levels(stormData$EVTYPE),ignore.case = TRUE)] <-"TWNID" #temp
 levels(stormData$EVTYPE)[grepl("DRY",levels(stormData$EVTYPE),ignore.case = TRUE)] <- "DROUGHT"
-levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="BELOW NORMAL PRECIPITATION"] <-  "DROUGHT"
-levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="DRIEST MONTH"] <-  "DROUGHT"
+# levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="BELOW NORMAL PRECIPITATION"] <-  "DROUGHT"
+# levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="DRIEST MONTH"] <-  "DROUGHT"
 levels(stormData$EVTYPE)[grepl("DUST D",levels(stormData$EVTYPE),ignore.case = TRUE)] <- "DUST DEVIL"
 levels(stormData$EVTYPE)[grepl("DUST S",levels(stormData$EVTYPE),ignore.case = TRUE)] <- "DUST STORM"
-levels(stormData$EVTYPE)[grepl("SAHA",levels(stormData$EVTYPE),ignore.case = TRUE)] <-"DUST STORM"
-levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="DUSTSTORM"] <-  "DUST STORM"
+# levels(stormData$EVTYPE)[grepl("SAHA",levels(stormData$EVTYPE),ignore.case = TRUE)] <-"DUST STORM"
+# levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="DUSTSTORM"] <-  "DUST STORM"
 levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="BLOWING DUST"] <-  "DUST STORM"
-
-#Excessive
-levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="Excessive Cold"] <- "CWC1"
-levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="EXCESSIVELY DRY"] <- "DROUGHT"
-levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="EXCESSIVE PRECIPITATION"] <- "HEAVY RAIN"
-levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="EXCESSIVE RAIN"] <- "HEAVY RAIN"
+# 
+# #Excessive/Heavy
+# levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="Excessive Cold"] <- "CWC1"
+# levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="EXCESSIVELY DRY"] <- "DROUGHT"
+# levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="EXCESSIVE PRECIPITATION"] <- "HEAVY RAIN"
+# levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="EXCESSIVE RAIN"] <- "HEAVY RAIN"
 levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="EXCESSIVE RAINFALL"] <- "HEAVY RAIN"
 levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="EXCESSIVE SNOW"] <- "HEAVY SNOW"
 levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="EXCESSIVE WETNESS"] <- "HEAVY RAIN"
-levels(stormData$EVTYPE)[grepl("FLASH",levels(stormData$EVTYPE),ignore.case = TRUE)] <- "FLASHFLUD" #temp
+levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="HEAVY SHOWER"] <- "HEAVY RAIN"
 
-#Lakes and floods
+
+# levels(stormData$EVTYPE)[grepl("FLASH",levels(stormData$EVTYPE),ignore.case = TRUE)] <- "FLASHFLUD" #temp
+# 
+# #Lakes and floods
 levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="LAKE FLOOD"] <- "LAKEFLUD"
 levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="LAKESHORE FLOOD"] <- "LAKEFLUD"
 levels(stormData$EVTYPE)[grepl("FLOOD",levels(stormData$EVTYPE),ignore.case = TRUE)] <- "FLOOD"
@@ -157,57 +174,62 @@ levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="FLASHFLUD"] <- "FLASH FLOOD"
 levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="LAKEFLUD"] <- "LAKESHORE FLOODING"
 levels(stormData$EVTYPE)[grepl("COASTALFLUD",levels(stormData$EVTYPE),ignore.case = TRUE)] <- "COASTAL FLOOD"
 levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="GUSTY LAKE WIND"] <- "HIGH WIND"
-levels(stormData$EVTYPE)[grepl("LAKE ",levels(stormData$EVTYPE),ignore.case = TRUE)] <- "LAKE-EFFECT SNOW"
+levels(stormData$EVTYPE)[grepl("LAKE ",levels(stormData$EVTYPE),ignore.case = TRUE)] <- "LESW" #temp
 levels(stormData$EVTYPE)[grepl("DAM ",levels(stormData$EVTYPE),ignore.case = TRUE)] <- "FLASH FLOOD"
-
-#WaterSpout
+# 
+# #WaterSpout
 levels(stormData$EVTYPE)[grepl("WATERSPOUT",levels(stormData$EVTYPE),ignore.case = TRUE)] <- "WATERSPOUT"
-levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="WATER SPOUT"] <- "WATERSPOUT"
-levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="WAYTERSPOUT"] <- "WATERSPOUT"
-
-#Funnel Clouds 
+# levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="WATER SPOUT"] <- "WATERSPOUT"
+# levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="WAYTERSPOUT"] <- "WATERSPOUT"
+# 
+# #Funnel Clouds 
 levels(stormData$EVTYPE)[grepl("FUNNEL",levels(stormData$EVTYPE),ignore.case = TRUE)] <- "FUNNEL CLOUD"
-
-#Hail (to the king baby)
+# 
+# #Hail (to the king baby)
 levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="MARINE HAIL"] <- "MHIAL"
 levels(stormData$EVTYPE)[grepl("HAIL",levels(stormData$EVTYPE),ignore.case = TRUE)] <- "HAIL"
 levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="MHIAL"] <- "MARINE HAIL"
-
-#Heat
+# 
+# #Heat
 levels(stormData$EVTYPE)[grepl("HEAT",levels(stormData$EVTYPE),ignore.case = TRUE)] <- "HEAT"
 levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="HIGH"] <- "HEAT"
-levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="HIGH TEMPERATURE RECORD"] <- "HEAT"
+# levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="HIGH TEMPERATURE RECORD"] <- "HEAT"
 levels(stormData$EVTYPE)[grepl("WARM",levels(stormData$EVTYPE),ignore.case = TRUE)] <- "HEAT"
-levels(stormData$EVTYPE)[grepl("HOT",levels(stormData$EVTYPE),ignore.case = TRUE)] <- "HEAT"
+# levels(stormData$EVTYPE)[grepl("HOT",levels(stormData$EVTYPE),ignore.case = TRUE)] <- "HEAT"
 levels(stormData$EVTYPE)[grepl("HYPERTHERMIA/EXPOSURE",levels(stormData$EVTYPE),ignore.case = TRUE)] <- "HEAT"
-
-#Ice Storm
+levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="EXH1"] <- "EXCESSIVE HEAT"
+# 
+# #Ice Storm
 levels(stormData$EVTYPE)[grepl("ICE STORM",levels(stormData$EVTYPE),ignore.case = TRUE)] <- "ICE STORM"
 levels(stormData$EVTYPE)[grepl("ICY",levels(stormData$EVTYPE),ignore.case = TRUE)] <- "ICE STORM"
-
-#Sleet
+# 
+# #Sleet
 levels(stormData$EVTYPE)[grepl("SLEET",levels(stormData$EVTYPE),ignore.case = TRUE)] <- "SLEET"
-
-#Cold/Wind Chill
+# 
+# #Cold/Wind Chill
 levels(stormData$EVTYPE)[grepl("COLD",levels(stormData$EVTYPE),ignore.case = TRUE)] <-"CWC1" #temp
 levels(stormData$EVTYPE)[grepl("CHILL",levels(stormData$EVTYPE),ignore.case = TRUE)] <-"CWC1" #temp
 levels(stormData$EVTYPE)[grepl("COOL",levels(stormData$EVTYPE),ignore.case = TRUE)] <-"CWC1" #temp
 levels(stormData$EVTYPE)[grepl("LOW TEMP",levels(stormData$EVTYPE),ignore.case = TRUE)] <-"CWC1" #temp
 levels(stormData$EVTYPE)[grepl("HYPOTHERMIA",levels(stormData$EVTYPE),ignore.case = TRUE)] <-"CWC1" #temp
-
-#Heavy Snow
+# 
+# #Heavy Snow
 levels(stormData$EVTYPE)[grepl("SNOW",levels(stormData$EVTYPE),ignore.case = TRUE)] <-"HEAVY SNOW"
-
-#Rain
+levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="LESW"] <-  "LAKE-EFFECT SNOW"
+# 
+# #Rain
 levels(stormData$EVTYPE)[grepl("RAIN",levels(stormData$EVTYPE),ignore.case = TRUE)] <-"HEAVY RAIN"
 levels(stormData$EVTYPE)[grepl("WET",levels(stormData$EVTYPE),ignore.case = TRUE)] <-"HEAVY RAIN"
 levels(stormData$EVTYPE)[grepl("PRECIP",levels(stormData$EVTYPE),ignore.case = TRUE)] <-"HEAVY RAIN"
+# 
+# #Lightening
 
-#Lightening
-levels(stormData$EVTYPE)[grepl("LIGHT",levels(stormData$EVTYPE),ignore.case = TRUE)] <- "LIGHTENING"
-
-#Wind
-levels(stormDataOrig$EVTYPE)[grepl("marine strong",levels(stormDataOrig$EVTYPE),ignore.case = TRUE)] <- "MSW1"
+levels(stormData$EVTYPE)[grepl("LIGHT",levels(stormData$EVTYPE),ignore.case = TRUE)] <- "LIGHTNING"
+levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="LIGNTNING"] <-  "LIGHTNING"
+# 
+# #Wind
+levels(stormData$EVTYPE)[grepl("MARINE STRONG",levels(stormData$EVTYPE),ignore.case = TRUE)] <- "MSW1" #temp
+levels(stormData$EVTYPE)[grepl("MARINE HIGH",levels(stormData$EVTYPE),ignore.case = TRUE)] <- "MSW2" #temp
 levels(stormData$EVTYPE)[grepl("strong",levels(stormData$EVTYPE),ignore.case = TRUE)] <- "SWC1"
 levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="NON-TSTM WIND"] <-  "HIGH WIND"
 levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="NON TSTM WIND"] <-  "HIGH WIND"
@@ -221,13 +243,14 @@ levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="CWC1"] <-  "COLD/WIND CHILL"
 levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="ECWC1"] <-  "EXTREME COLD/WIND CHILL"
 levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="SWC1"] <-  "STRONG WIND"
 levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="MSW1"] <-  "MARINE STRONG WIND"
+levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="MSW2"] <-  "MARINE HIGH WIND"
 levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="WND"] <-  "WIND"
 levels(stormData$EVTYPE)[grepl("GUSTNADO",levels(stormData$EVTYPE),ignore.case = TRUE)] <-"THUNDERSTORM WIND"
 levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="DOWNBURST"] <-  "THUNDERSTORM WIND"
-
-# High Surf
+# 
+# # High Surf
 levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="HIGH SWELLS"] <-  "HIGH SURF"
-levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="HIGH  SWELLS"] <-  "HIGH SURF"
+# levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="HIGH  SWELLS"] <-  "HIGH SURF"
 levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="HIGH WATER"] <-  "HIGH SURF"
 levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="HIGH SEAS"] <-  "HIGH SURF"
 levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="HIGH WAVES"] <-  "HIGH SURF"
@@ -235,37 +258,38 @@ levels(stormData$EVTYPE)[grepl("beach",levels(stormData$EVTYPE),ignore.case = TR
 levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="HEAVY SEAS"] <-  "HIGH SURF"
 levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="HEAVY SWELLS"] <-  "HIGH SURF"
 levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="ROGUE WAVE"] <-  "HIGH SURF"
-
-#Hurricane 
+levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="ROUGH SEAS"] <-  "HIGH SURF"
+# 
+# #Hurricane 
 levels(stormData$EVTYPE)[grepl("HUR",levels(stormData$EVTYPE),ignore.case = TRUE)] <-"HURRICANE/TYPHOON"
 levels(stormData$EVTYPE)[grepl("TYP",levels(stormData$EVTYPE),ignore.case = TRUE)] <-"HURRICANE/TYPHOON"
-
-#Ice Storm
+# 
+# #Ice Storm
 levels(stormData$EVTYPE)[grepl("ICE",levels(stormData$EVTYPE),ignore.case = TRUE)] <-"ICE STORM"
-
-#Tornado
+# 
+# #Tornado
 levels(stormData$EVTYPE)[grepl("TORNADO",levels(stormData$EVTYPE),ignore.case = TRUE)] <-"TORNADO"
 levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="TORNDAO"] <-  "TORNADO"
 levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="LANDSPOUT"] <-  "TORNADO"
-
-#Topical Storm
+# 
+# #Topical Storm
 levels(stormData$EVTYPE)[grepl("TROPICAL ST",levels(stormData$EVTYPE),ignore.case = TRUE)] <-"TROPICAL STORM"
-
-#Volcanic Ash
-levels(stormData$EVTYPE)[grepl("volc",levels(stormData$EVTYPE),ignore.case = TRUE)] <- "VOLCANIC ASH"
-
-#Wildfire
-levels(stormData$EVTYPE)[grepl("fire",levels(stormData$EVTYPE),ignore.case = TRUE)] <-"WILDFIRE"
-
-#Winter Weather and Winter Storm
+# 
+# #Volcanic Ash
+# levels(stormData$EVTYPE)[grepl("volc",levels(stormData$EVTYPE),ignore.case = TRUE)] <- "VOLCANIC ASH"
+# 
+# #Wildfire
+levels(stormData$EVTYPE)[grepl("FIRE",levels(stormData$EVTYPE),ignore.case = TRUE)] <-"WILDFIRE"
+# 
+# #Winter Weather and Winter Storm
 levels(stormData$EVTYPE)[grepl("WINTER ST",levels(stormData$EVTYPE),ignore.case = TRUE)] <-"XWNT" #temp
 levels(stormData$EVTYPE)[grepl("WINT",levels(stormData$EVTYPE),ignore.case = TRUE)] <- "WINTER WEATHER"
 levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="XWNT"] <-  "WINTER STORM"
-
-
-#levels(stormData$EVTYPE)[grepl("^TSTM",levels(stormData$EVTYPE),ignore.case = TRUE)] <- "THUNDERSTORM WIND"
-#levels(stormData$EVTYPE)[grepl("^TROPICAL STORM",levels(stormData$EVTYPE),ignore.case = TRUE)] <- "TROPICAL STORM"
-#levels(stormData$EVTYPE)[grepl("^THUNDER",levels(stormData$EVTYPE),ignore.case = TRUE)] <- "THUNDERSTORM WIND"
+# 
+# 
+# #levels(stormData$EVTYPE)[grepl("^TSTM",levels(stormData$EVTYPE),ignore.case = TRUE)] <- "THUNDERSTORM WIND"
+# #levels(stormData$EVTYPE)[grepl("^TROPICAL STORM",levels(stormData$EVTYPE),ignore.case = TRUE)] <- "TROPICAL STORM"
+# #levels(stormData$EVTYPE)[grepl("^THUNDER",levels(stormData$EVTYPE),ignore.case = TRUE)] <- "THUNDERSTORM WIND"
 
 
 stormData$EVTYPE <-factor (stormData$EVTYPE)

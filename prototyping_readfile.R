@@ -1,4 +1,4 @@
-require(data.table)
+#require(data.table)
 mydir <- getwd()
 dataFileExt <- paste0(mydir,"/data/repdata.data.StormData.csv")
 #dataFileExt <-  "/home/pengler/ReproducableResearch/RepData_PeerAssessment2/data/repdata.data.StormData.csv"

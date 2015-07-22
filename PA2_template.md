@@ -1,16 +1,30 @@
-# Reproducible Research: Peer Assessment 2
-Paul Engler  
-July 17, 2015  
+# Impact of Storm Events on Health and the Economy
+Paul  
+July 22, 2015  
 
 ## Summary/Synopsis
-- Synopsis: Immediately after the title, there should be a synopsis which describes and summarizes your analysis in at most 10 complete sentences.
+
+This report attempts to summarize the information within the NOAA Storm Database
+to answer two basic questions. 
+
+First, across the United States, which types of 
+events are most harmful with respect to population health. To answer this question 
+the data set has been analyzied to look for any events that lead to injuries or 
+fatailities. Based on this information it appears that **Tornado's** have the 
+greatest impact to public health. 
+
+
+Second, Across the United States, which types of events have the greatest 
+economic consequences? To answer this question the data set has been analyzied 
+to look for any events that lead to property of crop damage. Based on this 
+information it appears that **Floods** have the greatest economic impact. 
 
 ## Data Processing
 
-- There should be a section titled Data Processing which describes (in words and code) how the data were loaded into R and processed for analysis. In particular, your analysis must start from the raw CSV file containing the data. You cannot do any preprocessing outside the document. If preprocessing is time-consuming you may consider using the cache = TRUE option for certain code chunks
+### Data Retreival 
 
-- Set up the environment for the data analysis
-- Retreive and uncompress the data file
+All the data for this analysis is taken from the NOAA Storm Database located 
+at: https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2
 
 
 ```r
@@ -39,7 +53,18 @@ if (!file.exists(dataFileExt)) {
 }
 ```
 
-- Read in the data file
+### Data Loading
+Once the data file is pulled down, read in the data. The original file contains
+37 rows of data, most of which are not germain to the analysis. To limit the memory
+footprint the import is limited to the followinf fields: 
+- EVTYPE - Event Type
+- FATALITIES - Fatalities occuring from storm events
+- INJURIES - Injuries occuring from storm events
+- PROPDMG - Property damage from strom events
+- PRODDMGEXP - A scale factor for property damage (K=Thousands, M=Millions,B=Billions)
+- CROPDMG - Crop damage from strom events
+- CROPDMGEXP - A scale factor for crop damage (K=Thousands, M=Millions,B=Billions)
+   
 
 ```r
 # The data should all be in an uncompress format on disk
@@ -63,7 +88,18 @@ importColumns[28] = "factor"       #CROPDMGEXP
 stormData<-read.csv (dataFileExt, nrows=-1,colClasses = importColumns )
 ```
 
-- Clean the data
+### Tidying Data
+
+In order to perform the analysis the following steps were taken to manipulate the source data:
+
+1. All Rows that do not contain a value for PROPDMG,CROPDMG,FATALITIES, or INJURIES were removed
+2. Row's with bad EXP values (valid are "", K,M,B) for crop and property damage were removed
+3. If there are rows where property damage or crop damage are above 0 but there is no scale value(EXP), the EXP value is imputed to be "K". This could lead to under reported damage estimates
+4. Two new rows are imputed for the crop and property damage based on the value and the EXP. So for example a vaule of 5 with and EXP of M would be imputed in a new row to equal 5,000,000. 
+5. Rows that seem to contain summary data that may lead to double counting were removed. These include rows where the EVTYPE contained "Summary", "Record", or "Month"
+6. A new EVTYPE call "OTHER" was added to allow for collation of events that do not seem to align to any of the EVTYPEs as defined on Page 6 of the [NATIONAL WEATHER SERVICE INSTRUCTION 10-1605](https://d396qusza40orc.cloudfront.net/repdata%2Fpeer2_doc%2Fpd01016005curr.pdf)
+7. The remainder of the EVTYPE were aligned to the values contained within the aformentioned document, based on the descriptions of each EVTYPE. 
+
 
 ```r
 # We are only interested in data where there was: Property/Crop Damage, 
@@ -95,7 +131,6 @@ stormData <- stormData[stormData$CROPDMGEXP %in% c("","K","M","B"),]
 #re-level the factor now that rows have been removed
 stormData$PROPDMGEXP <-factor(stormData$PROPDMGEXP)
 stormData$CROPDMGEXP <-factor(stormData$CROPDMGEXP)
-step1Rows <- nrow(stormData)
 
 # There are certain cases where the EXP value was not included but a
 # DMG value was associated. Impute these to "K" values, this may lead to 
@@ -309,8 +344,6 @@ levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="XWNT"] <-  "WINTER STORM"
 ```
 
 ## Results
-- The analysis document must have at least one figure containing a plot.
-- Your analyis must have no more than three figures. Figures may have multiple plots in them (i.e. panel plots), but there cannot be more than three figures total
 
 ### Question 1: Across the United States, which types of events are most harmful with respect to population health
 

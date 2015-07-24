@@ -119,7 +119,16 @@ if (!file.exists(dataFileExt)) {
 </div>
 <div id="data-loading" class="section level3">
 <h3>Data Loading</h3>
-<p>Once the data file is pulled down, read in the data. The original file contains 37 rows of data, most of which are not germain to the analysis. To limit the memory footprint the import is limited to the followinf fields: - EVTYPE - Event Type - FATALITIES - Fatalities occuring from storm events - INJURIES - Injuries occuring from storm events - PROPDMG - Property damage from strom events - PRODDMGEXP - A scale factor for property damage (K=Thousands, M=Millions,B=Billions) - CROPDMG - Crop damage from strom events - CROPDMGEXP - A scale factor for crop damage (K=Thousands, M=Millions,B=Billions)</p>
+<p>Once the data file is pulled down, read in the data. The original file contains 37 rows of data, most of which are not germain to the analysis. To limit the memory footprint the import is limited to the followinf fields:</p>
+<ul>
+<li>EVTYPE - Event Type</li>
+<li>FATALITIES - Fatalities occuring from storm events</li>
+<li>INJURIES - Injuries occuring from storm events</li>
+<li>PROPDMG - Property damage from strom events</li>
+<li>PRODDMGEXP - A scale factor for property damage (K=Thousands, M=Millions,B=Billions)</li>
+<li>CROPDMG - Crop damage from strom events</li>
+<li>CROPDMGEXP - A scale factor for crop damage (K=Thousands, M=Millions,B=Billions)</li>
+</ul>
 <pre class="r"><code># The data should all be in an uncompress format on disk
 # we can now read in the data using read.csv and
 # defining our colClasses to minimize our in-memory footprint 

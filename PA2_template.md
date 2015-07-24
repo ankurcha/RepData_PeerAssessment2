@@ -57,6 +57,7 @@ if (!file.exists(dataFileExt)) {
 Once the data file is pulled down, read in the data. The original file contains
 37 rows of data, most of which are not germain to the analysis. To limit the memory
 footprint the import is limited to the followinf fields: 
+
 - EVTYPE - Event Type
 - FATALITIES - Fatalities occuring from storm events
 - INJURIES - Injuries occuring from storm events

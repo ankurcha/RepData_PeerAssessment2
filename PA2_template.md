@@ -1,6 +1,6 @@
 # Impact of Storm Events on Health and the Economy
 Paul  
-July 22, 2015  
+July 23, 2015  
 
 ## Summary/Synopsis
 
@@ -9,13 +9,13 @@ to answer two basic questions.
 
 First, across the United States, which types of 
 events are most harmful with respect to population health. To answer this question 
-the data set has been analyzied to look for any events that lead to injuries or 
-fatailities. Based on this information it appears that **Tornado's** have the 
+the data set has been analyzed to look for any events that lead to injuries or 
+fatalities. Based on this information it appears that **Tornados** have the 
 greatest impact to public health. 
 
 
 Second, Across the United States, which types of events have the greatest 
-economic consequences? To answer this question the data set has been analyzied 
+economic consequences? To answer this question the data set has been analyzed 
 to look for any events that lead to property of crop damage. Based on this 
 information it appears that **Floods** have the greatest economic impact. 
 
@@ -55,16 +55,16 @@ if (!file.exists(dataFileExt)) {
 
 ### Data Loading
 Once the data file is pulled down, read in the data. The original file contains
-37 rows of data, most of which are not germain to the analysis. To limit the memory
-footprint the import is limited to the followinf fields: 
+37 rows of data, most of which are not germane to the analysis. To limit the memory
+footprint the import is limited to the following fields: 
 
 - EVTYPE - Event Type
-- FATALITIES - Fatalities occuring from storm events
-- INJURIES - Injuries occuring from storm events
-- PROPDMG - Property damage from strom events
-- PRODDMGEXP - A scale factor for property damage (K=Thousands, M=Millions,B=Billions)
-- CROPDMG - Crop damage from strom events
-- CROPDMGEXP - A scale factor for crop damage (K=Thousands, M=Millions,B=Billions)
+- FATALITIES - Fatalities occurring from storm events
+- INJURIES - Injuries occurring from storm events
+- PROPDMG - Property damage from storm events
+- PRODDMGEXP - A scale factor for property damage (K=Thousands, M=Millions, B=Billions)
+- CROPDMG - Crop damage from storm events
+- CROPDMGEXP - A scale factor for crop damage (K=Thousands, M=Millions, B=Billions)
    
 
 ```r
@@ -96,10 +96,10 @@ In order to perform the analysis the following steps were taken to manipulate th
 1. All Rows that do not contain a value for PROPDMG,CROPDMG,FATALITIES, or INJURIES were removed
 2. Row's with bad EXP values (valid are "", K,M,B) for crop and property damage were removed
 3. If there are rows where property damage or crop damage are above 0 but there is no scale value(EXP), the EXP value is imputed to be "K". This could lead to under reported damage estimates
-4. Two new rows are imputed for the crop and property damage based on the value and the EXP. So for example a vaule of 5 with and EXP of M would be imputed in a new row to equal 5,000,000. 
+4. Two new rows are imputed for the crop and property damage based on the value and the EXP. So for example a value of 5 with and EXP of M would be imputed in a new row to equal 5,000,000. 
 5. Rows that seem to contain summary data that may lead to double counting were removed. These include rows where the EVTYPE contained "Summary", "Record", or "Month"
 6. A new EVTYPE call "OTHER" was added to allow for collation of events that do not seem to align to any of the EVTYPEs as defined on Page 6 of the [NATIONAL WEATHER SERVICE INSTRUCTION 10-1605](https://d396qusza40orc.cloudfront.net/repdata%2Fpeer2_doc%2Fpd01016005curr.pdf)
-7. The remainder of the EVTYPE were aligned to the values contained within the aformentioned document, based on the descriptions of each EVTYPE. 
+7. The remainder of the EVTYPE were aligned to the values contained within the aforementioned document, based on the descriptions of each EVTYPE. 
 
 
 ```r
@@ -371,6 +371,11 @@ print (p)
 ```
 
 ![](PA2_template_files/figure-html/Question_One-1.png) 
+**FIGURE 1:** A bar plot showing the event types that are most harmful with respect to
+population health. The plot is organized in ascending order (left -> right) of least
+to most harmful event types. The cumulative attributed injuries and fatalities are 
+stacked to provide a combined impact to population health. 
+
 
 ### Question 2: Across the United States, which types of events have the greatest economic consequences
 
@@ -394,3 +399,7 @@ print(p)
 ```
 
 ![](PA2_template_files/figure-html/Question_two-1.png) 
+**FIGURE 2:** A bar plot showing the event types that have the greatest economic 
+impact. The plot is organized in ascending order (left -> right) of least
+to most economically impactful event types. The cumulative property and crop
+damage costs are stacked to provide a combined economic impact. 

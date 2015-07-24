@@ -1,7 +1,7 @@
 ---
 title: "Impact of Storm Events on Health and the Economy"
 author: "Paul"
-date: "July 22, 2015"
+date: "July 23, 2015"
 output: 
    html_document:
      keep_md: yes
@@ -16,7 +16,7 @@ to answer two basic questions.
 First, across the United States, which types of 
 events are most harmful with respect to population health. To answer this question 
 the data set has been analyzed to look for any events that lead to injuries or 
-fatalities. Based on this information it appears that **Tornado's** have the 
+fatalities. Based on this information it appears that **Tornados** have the 
 greatest impact to public health. 
 
 
@@ -372,6 +372,11 @@ p = ggplot(data=discreteEventInjuries, aes(x=reorder(EVTYPE,value), y=value,fill
 
 print (p)
 ```
+**FIGURE 1:** A bar plot showing the event types that are most harmful with respect to
+population health. The plot is organized in ascending order (left -> right) of least
+to most harmful event types. The cumulative attributed injuries and fatalities are 
+stacked to provide a combined impact to population health. 
+
 
 ### Question 2: Across the United States, which types of events have the greatest economic consequences
 ```{r Question_two, echo=TRUE,fig.height=10, fig.width=12}
@@ -393,3 +398,7 @@ p = ggplot(data=discreteEventDamage, aes(x=reorder(EVTYPE,value), y=value,fill=v
 print(p)
 
 ```
+**FIGURE 2:** A bar plot showing the event types that have the greatest economic 
+impact. The plot is organized in ascending order (left -> right) of least
+to most economically impactful event types. The cumulative property and crop
+damage costs are stacked to provide a combined economic impact. 

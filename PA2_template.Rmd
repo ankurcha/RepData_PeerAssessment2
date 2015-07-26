@@ -1,8 +1,6 @@
 ---
 title: "Impact of Storm Events on Health and the Economy"
-author: "Paul"
-date: "July 23, 2015"
-output: 
+output:
    html_document:
      keep_md: yes
      toc: yes
@@ -11,25 +9,25 @@ output:
 ## Summary/Synopsis
 
 This report attempts to summarize the information within the NOAA Storm Database
-to answer two basic questions. 
+to answer two basic questions.
 
-First, across the United States, which types of 
-events are most harmful with respect to population health. To answer this question 
-the data set has been analyzed to look for any events that lead to injuries or 
-fatalities. Based on this information it appears that **Tornados** have the 
-greatest impact to public health. 
+First, across the United States, which types of
+events are most harmful with respect to population health. To answer this question
+the data set has been analyzed to look for any events that lead to injuries or
+fatalities. Based on this information it appears that **Tornados** have the
+greatest impact to public health.
 
 
-Second, Across the United States, which types of events have the greatest 
-economic consequences? To answer this question the data set has been analyzed 
-to look for any events that lead to property of crop damage. Based on this 
-information it appears that **Floods** have the greatest economic impact. 
+Second, Across the United States, which types of events have the greatest
+economic consequences? To answer this question the data set has been analyzed
+to look for any events that lead to property of crop damage. Based on this
+information it appears that **Floods** have the greatest economic impact.
 
 ## Data Processing
 
-### Data Retreival 
+### Data Retreival
 
-All the data for this analysis is taken from the NOAA Storm Database located 
+All the data for this analysis is taken from the NOAA Storm Database located
 at: https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2
 
 ```{r Data_Retreival, echo=TRUE}
@@ -44,11 +42,11 @@ dataFileExt  <- paste(dataDir,dataFileExt,sep="/")
 # Only download the and unpack the file if it does not exist
 # This should be a one time performance penalty on the first execution
 # and will leave the uncompress data on disk so that we can be more
-# efficient in reading the data later on. 
-if (!file.exists(dataFile)) { 
+# efficient in reading the data later on.
+if (!file.exists(dataFile)) {
    dir.create(dataDir,showWarnings = FALSE)
    download.file(url=dataURL,destfile=dataFile,method="curl")
-}   
+}
 
 # Check if we have the uncompressed file
 if (!file.exists(dataFileExt)) {
@@ -61,7 +59,7 @@ if (!file.exists(dataFileExt)) {
 ### Data Loading
 Once the data file is pulled down, read in the data. The original file contains
 37 rows of data, most of which are not germane to the analysis. To limit the memory
-footprint the import is limited to the following fields: 
+footprint the import is limited to the following fields:
 
 - EVTYPE - Event Type
 - FATALITIES - Fatalities occurring from storm events
@@ -70,11 +68,11 @@ footprint the import is limited to the following fields:
 - PRODDMGEXP - A scale factor for property damage (K=Thousands, M=Millions, B=Billions)
 - CROPDMG - Crop damage from storm events
 - CROPDMGEXP - A scale factor for crop damage (K=Thousands, M=Millions, B=Billions)
-   
+
 ```{r Read_Data, echo=TRUE}
 # The data should all be in an uncompress format on disk
 # we can now read in the data using read.csv and
-# defining our colClasses to minimize our in-memory footprint 
+# defining our colClasses to minimize our in-memory footprint
 
 # The data set has 37 columns,
 importColumns <- rep("NULL",37)
@@ -101,27 +99,27 @@ In order to perform the analysis the following steps were taken to manipulate th
 1. All Rows that do not contain a value for PROPDMG,CROPDMG,FATALITIES, or INJURIES were removed
 2. Row's with bad EXP values (valid are "", K,M,B) for crop and property damage were removed
 3. If there are rows where property damage or crop damage are above 0 but there is no scale value(EXP), the EXP value is imputed to be "K". This could lead to under reported damage estimates
-4. Two new rows are imputed for the crop and property damage based on the value and the EXP. So for example a value of 5 with and EXP of M would be imputed in a new row to equal 5,000,000. 
+4. Two new rows are imputed for the crop and property damage based on the value and the EXP. So for example a value of 5 with and EXP of M would be imputed in a new row to equal 5,000,000.
 5. Rows that seem to contain summary data that may lead to double counting were removed. These include rows where the EVTYPE contained "Summary", "Record", or "Month"
 6. A new EVTYPE call "OTHER" was added to allow for collation of events that do not seem to align to any of the EVTYPEs as defined on Page 6 of the [NATIONAL WEATHER SERVICE INSTRUCTION 10-1605](https://d396qusza40orc.cloudfront.net/repdata%2Fpeer2_doc%2Fpd01016005curr.pdf)
-7. The remainder of the EVTYPE were aligned to the values contained within the aforementioned document, based on the descriptions of each EVTYPE. 
+7. The remainder of the EVTYPE were aligned to the values contained within the aforementioned document, based on the descriptions of each EVTYPE.
 
 ```{r Clean_Data, echo=TRUE}
-# We are only interested in data where there was: Property/Crop Damage, 
+# We are only interested in data where there was: Property/Crop Damage,
 # Injuries or Fatalities. If all of these data points are 0 for a row we
-# can discard it. 
+# can discard it.
 
-stormData <- stormData[(stormData$PROPDMG > 0 | 
+stormData <- stormData[(stormData$PROPDMG > 0 |
                         stormData$CROPDMG > 0 |
                         stormData$FATALITIES >0 |
                         stormData$INJURIES >0) , ]
 
-#Convert our date's to a POSIX date 
+#Convert our date's to a POSIX date
 #stormData$BGN_DATE <-as.POSIXct( stormData$BGN_DATE , format = "%m/%d/%Y %H:%M:%S")
 
-# Convert the property damage to actual dollars 
-# Estimates should be rounded to three significant digits, followed by an 
-# alphabetical character signifying the magnitude of the number, i.e., 1.55B 
+# Convert the property damage to actual dollars
+# Estimates should be rounded to three significant digits, followed by an
+# alphabetical character signifying the magnitude of the number, i.e., 1.55B
 # for $1,550,000,000. Alphabetical characters used to signify magnitude
 # include “K” for thousands, “M” for millions, and “B” for billions
 
@@ -138,13 +136,13 @@ stormData$PROPDMGEXP <-factor(stormData$PROPDMGEXP)
 stormData$CROPDMGEXP <-factor(stormData$CROPDMGEXP)
 
 # There are certain cases where the EXP value was not included but a
-# DMG value was associated. Impute these to "K" values, this may lead to 
+# DMG value was associated. Impute these to "K" values, this may lead to
 # under reporting damage estimates
 stormData[(stormData$PROPDMG > 0 & stormData$PROPDMGEXP ==""),]$PROPDMGEXP <-"K"
 stormData[(stormData$CROPDMG > 0 & stormData$CROPDMGEXP ==""),]$CROPDMGEXP <-"K"
 
 # Add columns for the real $ value based on the *DMG and *DMGEXP columns
-expandDollars <- function (dmg,dmgexp) { 
+expandDollars <- function (dmg,dmgexp) {
    if (dmg == 0 ) { return(0) }
    else if (dmgexp =="K") {return(dmg*1000)}
    else if (dmgexp =="M") {return(dmg*1000000)}
@@ -158,7 +156,7 @@ stormData$CROPDMGDOLLAR<-mapply(expandDollars,stormData$CROPDMG,stormData$CROPDM
 # of the "NATIONAL WEATHER SERVICE INSTRUCTION 10-1605" document
 
 # Remove "Summary","Record","Monthly" rows, these seem to be summarizing data
-# and could be leading to double counting 
+# and could be leading to double counting
 stormData <- stormData[!grepl("^Summary",stormData$EVTYPE,ignore.case = TRUE),]
 stormData <- stormData[!grepl("^Record",stormData$EVTYPE,ignore.case = TRUE),]
 stormData <- stormData[!grepl("^Month",stormData$EVTYPE,ignore.case = TRUE),]
@@ -175,14 +173,14 @@ levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="HEAVY MIX"] <- "HEAVY RAIN"
 levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="SEVERE TURBULENCE"] <- "HEAVY RAIN"
 
 #Group EVTYPES to align with doc
-# Due to overlapping in descriptions the ordering the grouping is done in is fairly sensitive 
- 
+# Due to overlapping in descriptions the ordering the grouping is done in is fairly sensitive
+
 #TStorm Surge
 levels(stormData$EVTYPE)[grepl("SURGE",levels(stormData$EVTYPE),ignore.case = TRUE)] <- "STORM SURGE"
- 
+
 # #Tide
 levels(stormData$EVTYPE)[grepl("TIDE",levels(stormData$EVTYPE),ignore.case = TRUE)] <- "ASTRONOMICAL HIGH TIDE"
- 
+
 #Avalanche
 levels(stormData$EVTYPE)[grepl("AVALA",levels(stormData$EVTYPE),ignore.case = TRUE)] <- "AVALANCHE"
 
@@ -190,7 +188,7 @@ levels(stormData$EVTYPE)[grepl("AVALA",levels(stormData$EVTYPE),ignore.case = TR
 levels(stormData$EVTYPE)[grepl("BLIZZ",levels(stormData$EVTYPE),ignore.case = TRUE)] <- "BLIZZARD"
 
 #Rip Current
-levels(stormData$EVTYPE)[grepl("RIP",levels(stormData$EVTYPE),ignore.case = TRUE)]  <- "RIP CURRENT" 
+levels(stormData$EVTYPE)[grepl("RIP",levels(stormData$EVTYPE),ignore.case = TRUE)]  <- "RIP CURRENT"
 
 #High Surf
 levels(stormData$EVTYPE)[grepl("SURF",levels(stormData$EVTYPE),ignore.case = TRUE)] <-"HIGH SURF"
@@ -199,9 +197,9 @@ levels(stormData$EVTYPE)[grepl("SURF",levels(stormData$EVTYPE),ignore.case = TRU
 levels(stormData$EVTYPE)[grepl("COAST",levels(stormData$EVTYPE),ignore.case = TRUE)] <- "COASTALFLUD" #temp
 
 #Debris Flow
-levels(stormData$EVTYPE)[grepl("SLIDE",levels(stormData$EVTYPE),ignore.case = TRUE)] <- "DEBRIS FLOW" 
-levels(stormData$EVTYPE)[grepl("SLUMP",levels(stormData$EVTYPE),ignore.case = TRUE)] <- "DEBRIS FLOW" 
- 
+levels(stormData$EVTYPE)[grepl("SLIDE",levels(stormData$EVTYPE),ignore.case = TRUE)] <- "DEBRIS FLOW"
+levels(stormData$EVTYPE)[grepl("SLUMP",levels(stormData$EVTYPE),ignore.case = TRUE)] <- "DEBRIS FLOW"
+
 #Extreme
 levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="EXTREME HEAT"] <- "EXH1"
 levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="EXCESSIVE HEAT"] <- "EXH1"
@@ -248,7 +246,7 @@ levels(stormData$EVTYPE)[grepl("DAM ",levels(stormData$EVTYPE),ignore.case = TRU
 #WaterSpout
 levels(stormData$EVTYPE)[grepl("WATERSPOUT",levels(stormData$EVTYPE),ignore.case = TRUE)] <- "WATERSPOUT"
 
-#Funnel Clouds 
+#Funnel Clouds
 levels(stormData$EVTYPE)[grepl("FUNNEL",levels(stormData$EVTYPE),ignore.case = TRUE)] <- "FUNNEL CLOUD"
 
 #Hail (to the king baby)
@@ -316,13 +314,13 @@ levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="HIGH SWELLS"] <-  "HIGH SURF
 levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="HIGH WATER"] <-  "HIGH SURF"
 levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="HIGH SEAS"] <-  "HIGH SURF"
 levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="HIGH WAVES"] <-  "HIGH SURF"
-levels(stormData$EVTYPE)[grepl("beach",levels(stormData$EVTYPE),ignore.case = TRUE)] <- "HIGH SURF" 
+levels(stormData$EVTYPE)[grepl("beach",levels(stormData$EVTYPE),ignore.case = TRUE)] <- "HIGH SURF"
 levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="HEAVY SEAS"] <-  "HIGH SURF"
 levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="HEAVY SWELLS"] <-  "HIGH SURF"
 levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="ROGUE WAVE"] <-  "HIGH SURF"
 levels(stormData$EVTYPE)[levels(stormData$EVTYPE)=="ROUGH SEAS"] <-  "HIGH SURF"
 
-#Hurricane 
+#Hurricane
 levels(stormData$EVTYPE)[grepl("HUR",levels(stormData$EVTYPE),ignore.case = TRUE)] <-"HURRICANE/TYPHOON"
 levels(stormData$EVTYPE)[grepl("TYP",levels(stormData$EVTYPE),ignore.case = TRUE)] <-"HURRICANE/TYPHOON"
 
@@ -374,8 +372,8 @@ print (p)
 ```
 **FIGURE 1:** A bar plot showing the event types that are most harmful with respect to
 population health. The plot is organized in ascending order (left -> right) of least
-to most harmful event types. The cumulative attributed injuries and fatalities are 
-stacked to provide a combined impact to population health. 
+to most harmful event types. The cumulative attributed injuries and fatalities are
+stacked to provide a combined impact to population health.
 
 
 ### Question 2: Across the United States, which types of events have the greatest economic consequences
@@ -398,7 +396,7 @@ p = ggplot(data=discreteEventDamage, aes(x=reorder(EVTYPE,value), y=value,fill=v
 print(p)
 
 ```
-**FIGURE 2:** A bar plot showing the event types that have the greatest economic 
+**FIGURE 2:** A bar plot showing the event types that have the greatest economic
 impact. The plot is organized in ascending order (left -> right) of least
 to most economically impactful event types. The cumulative property and crop
-damage costs are stacked to provide a combined economic impact. 
+damage costs are stacked to provide a combined economic impact.
